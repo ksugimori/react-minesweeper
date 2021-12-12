@@ -1,0 +1,14 @@
+@import "../variables.scss";
+
+.cell {
+  width: 2em;
+  height: 2em;
+  text-align: center;
+  line-height: 2em;
+  border: 0.1em solid $main-color;
+  background-color: $main-color;
+}
+
+.cell-open {
+  background-color: $secondary-color;
+}
