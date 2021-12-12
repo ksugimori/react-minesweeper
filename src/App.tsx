@@ -1,18 +1,14 @@
 import React from 'react';
 import './App.scss';
 import Cell from './components/Cell';
-import CellState from './models/CellState';
+import { useGame } from './state/GameProvider';
 
 function App() {
-  const cellList: CellState[] = [
-    { count: 1, isOpen: false },
-    { count: 2, isOpen: true },
-    { count: 3, isOpen: true },
-  ];
+  const { game } = useGame();
 
   return (
     <div className="App">
-      {cellList.map(cell => <Cell {...cell} />)}
+      {game.cells[0].map(cell => <Cell {...cell} />)}
     </div>
   );
 }
