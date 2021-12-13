@@ -1,6 +1,7 @@
 import React from 'react';
-import './cell.scss';
+import './Cell.scss';
 import CellState from '../models/CellState';
+import Point from '../models/Point';
 import { useGame } from '../state/GameProvider';
 
 /**
@@ -8,17 +9,17 @@ import { useGame } from '../state/GameProvider';
  * @param props 
  * @returns セル
  */
-const Cell: React.FC<CellState> = function (props) {
+const Cell: React.FC<CellState & Point> = function ({ x, y, isOpen, count }) {
   const { openCell } = useGame();
 
   const classNameList = ['cell']
-  props.isOpen && classNameList.push('cell-open')
+  isOpen && classNameList.push('cell-open')
   return (
     <div
       className={classNameList.join(' ')}
-      onClick={e => openCell(0, 0)}
+      onClick={() => openCell(x, y)}
     >
-      {props.isOpen ? props.count : ''}
+      {isOpen ? count : ''}
     </div>
   );
 }
