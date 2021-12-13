@@ -10,7 +10,7 @@ interface Game {
   openCell: (x: number, y: number) => void
 }
 
-const field: Field = {
+const initialField: Field = {
   rows: [
     [
       { count: 1, isOpen: false },
@@ -29,14 +29,24 @@ const field: Field = {
     ]
   ]
 };
-const GameContext: React.Context<Game> = createContext({ field, openCell });
+const tmp: Game = {
+  field: initialField,
+  openCell: (x, y) => { }
+}
+const GameContext: React.Context<Game> = createContext(tmp);
 export const useGame = () => useContext(GameContext);
 
-function openCell(x: number, y: number) {
-  console.log(`click (${x}, ${y})`)
-}
-
 export default function GameProvider(props: any) {
+  const [field, setField] = useState(initialField);
+
+  const openCell = (x: number, y: number) => {
+    const newField = { rows: field.rows.slice() }
+    const cell = newField.rows[y][x]
+    cell.isOpen = !cell.isOpen
+
+    setField(newField);
+  }
+
   return (
     <GameContext.Provider value={{ field, openCell }}>
       {props.children}
