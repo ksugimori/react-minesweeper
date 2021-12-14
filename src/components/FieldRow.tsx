@@ -6,7 +6,7 @@ import CellState from '../models/CellState';
 /**
  * props
  */
-type Props = {
+interface Props {
   /** y座標 */
   y: number;
 
@@ -19,12 +19,10 @@ type Props = {
  * @param param0 props
  * @returns 行
  */
-const FieldRow: React.FC<Props> = function ({ y, cells }) {
+export default function FieldRow({ y, cells }: Props) {
   return (
     <div className='flex-row'>
-      {cells.map((cell, x) => <Cell key={x} x={x} y={y} {...cell} />)}
+      {cells.map((cell, x) => <Cell key={x} at={{ x, y }} {...cell} />)}
     </div>
   );
 }
-
-export default FieldRow;

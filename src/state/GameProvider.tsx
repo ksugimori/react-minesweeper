@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext } from 'react';
 import CellState from '../models/CellState';
+import Point from '../models/Point';
 
 // TODO: クラス化？
 interface Field {
@@ -7,7 +8,7 @@ interface Field {
 }
 interface Game {
   field: Field;
-  openCell: (x: number, y: number) => void
+  openCell: (p: Point) => void
 }
 
 const initialField: Field = {
@@ -29,19 +30,19 @@ const initialField: Field = {
     ]
   ]
 };
-const tmp: Game = {
+const initialValue: Game = {
   field: initialField,
-  openCell: (x, y) => { }
+  openCell: p => { }
 }
-const GameContext: React.Context<Game> = createContext(tmp);
+const GameContext: React.Context<Game> = createContext(initialValue);
 export const useGame = () => useContext(GameContext);
 
-export default function GameProvider(props: any) {
+function GameProvider({ children }: { children: React.ReactNode }) {
   const [field, setField] = useState(initialField);
 
-  const openCell = (x: number, y: number) => {
+  const openCell = (p: Point) => {
     const newField = { rows: field.rows.slice() }
-    const cell = newField.rows[y][x]
+    const cell = newField.rows[p.y][p.x]
     cell.isOpen = !cell.isOpen
 
     setField(newField);
@@ -49,7 +50,9 @@ export default function GameProvider(props: any) {
 
   return (
     <GameContext.Provider value={{ field, openCell }}>
-      {props.children}
+      {children}
     </GameContext.Provider>
   );
 }
+
+export default GameProvider;

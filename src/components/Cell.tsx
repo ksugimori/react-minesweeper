@@ -9,7 +9,7 @@ import { useGame } from '../state/GameProvider';
  * @param props 
  * @returns セル
  */
-const Cell: React.FC<CellState & Point> = function ({ x, y, isOpen, count }) {
+export default function Cell({ at, isOpen, count }: { at: Point } & CellState) {
   const { openCell } = useGame();
 
   const classNameList = ['cell']
@@ -17,11 +17,9 @@ const Cell: React.FC<CellState & Point> = function ({ x, y, isOpen, count }) {
   return (
     <div
       className={classNameList.join(' ')}
-      onClick={() => openCell(x, y)}
+      onClick={() => openCell(at)}
     >
       {isOpen ? count : ''}
     </div>
   );
 }
-
-export default Cell;
