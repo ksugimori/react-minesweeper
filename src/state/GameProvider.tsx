@@ -1,10 +1,10 @@
 import React, { createContext, useState, useContext } from 'react';
-import CellState from '../models/CellState';
+import Cell from '../models/Cell';
 import Point from '../models/Point';
 
 // TODO: クラス化？
 interface Field {
-  rows: CellState[][];
+  rows: Cell[][];
 }
 interface Game {
   field: Field;
@@ -14,19 +14,19 @@ interface Game {
 const initialField: Field = {
   rows: [
     [
-      { count: 1, isOpen: false },
-      { count: 2, isOpen: true },
-      { count: 3, isOpen: true },
+      new Cell({ x: 0, y: 0 }),
+      new Cell({ x: 1, y: 0 }),
+      new Cell({ x: 2, y: 0 })
     ],
     [
-      { count: 4, isOpen: true },
-      { count: 5, isOpen: false },
-      { count: 6, isOpen: true },
+      new Cell({ x: 0, y: 1 }),
+      new Cell({ x: 1, y: 1 }),
+      new Cell({ x: 2, y: 1 })
     ],
     [
-      { count: 7, isOpen: true },
-      { count: 8, isOpen: true },
-      { count: 9, isOpen: false },
+      new Cell({ x: 0, y: 2 }),
+      new Cell({ x: 1, y: 2 }),
+      new Cell({ x: 2, y: 2 })
     ]
   ]
 };

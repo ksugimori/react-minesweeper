@@ -1,7 +1,6 @@
 import React from 'react';
-import './Cell.scss';
-import CellState from '../models/CellState';
-import Point from '../models/Point';
+import './MsCell.scss';
+import Cell from '../models/Cell';
 import { useGame } from '../state/GameProvider';
 
 /**
@@ -9,7 +8,7 @@ import { useGame } from '../state/GameProvider';
  * @param props 
  * @returns セル
  */
-export default function Cell({ at, isOpen, count }: { at: Point } & CellState) {
+export default function MsCell({ at, isOpen, count }: Cell) {
   const { openCell } = useGame();
 
   const classNameList = ['cell']

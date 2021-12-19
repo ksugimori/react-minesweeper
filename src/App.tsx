@@ -1,11 +1,11 @@
 import React from 'react';
 import './App.scss';
-import Field from './components/Field';
+import MsField from './components/MsField';
 
 function App() {
   return (
     <div className="App">
-      <Field />
+      <MsField />
     </div>
   );
 }
