@@ -1,11 +1,9 @@
 import React, { createContext, useState, useContext } from 'react';
 import Cell from '../models/Cell';
+import Field from '../models/Field';
 import Point from '../models/Point';
 
 // TODO: クラス化？
-interface Field {
-  rows: Cell[][];
-}
 interface Game {
   field: Field;
   openCell: (p: Point) => void

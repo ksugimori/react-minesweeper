@@ -1,31 +1,33 @@
 import React from 'react';
 import './MsField.scss';
-import { useGame } from '../state/GameProvider'
 import MsCell from './MsCell';
 import Cell from '../models/Cell';
+import Field from '../models/Field';
+import Point from '../models/Point';
 
-/**
- * MsField の１行を作る
- * @param cells この行に表示するセル
- * @param y Y座標
- * @returns 行
- */
-const toFieldRow = (cells: Cell[], y: number) => (
-  <div className='ms-field-row' key={y}>
-    {cells.map(cell => <MsCell key={cell.id} {...cell} />)}
-  </div>
-);
+type Props = {
+  field: Field;
+  onClickCell: (p: Point) => void
+}
 
 /**
  * フィールド
  * @returns MsField
  */
-function MsField() {
-  const { field } = useGame();
+function MsField({ field, onClickCell }: Props) {
+  const toMsCell = (cell: Cell, x: number, y: number) => (
+    <MsCell key={cell.id} onClick={onClickCell} {...cell} />
+  );
+
+  const toMsFieldRow = (cells: Cell[], y: number) => (
+    <div className='ms-field-row' key={y}>
+      {cells.map((cell, x) => toMsCell(cell, x, y))}
+    </div>
+  );
 
   return (
     <div className="ms-field">
-      {field.rows.map(toFieldRow)}
+      {field.rows.map(toMsFieldRow)}
     </div>
   );
 }
