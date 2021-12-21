@@ -1,5 +1,10 @@
 @import '../variables.scss';
 
-.field {
+.ms-field-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.ms-field {
   border: 0.1em solid $main-color;
 }
