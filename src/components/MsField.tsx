@@ -3,17 +3,18 @@ import './MsField.scss';
 import MsCell from './MsCell';
 import Cell from '../models/Cell';
 import { Coordinate } from '../models/interfaces'
+import Field from '../models/Field';
 
 type Props = {
-  rows: Cell[][];
-  onClickCell: (p: Coordinate) => void
+  field: Field;
+  onClickCell: (p: Coordinate) => void;
 }
 
 /**
  * フィールド
  * @returns MsField
  */
-function MsField({ rows, onClickCell }: Props) {
+function MsField({ field, onClickCell }: Props) {
   const toMsCell = (cell: Cell, x: number, y: number) => (
     <MsCell key={`${x}:${y}`} at={{ x, y }} onClick={onClickCell} {...cell} />
   );
@@ -26,7 +27,7 @@ function MsField({ rows, onClickCell }: Props) {
 
   return (
     <div className="ms-field">
-      {rows.map(toMsFieldRow)}
+      {field.rows.map(toMsFieldRow)}
     </div>
   );
 }

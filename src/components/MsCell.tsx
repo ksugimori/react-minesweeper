@@ -18,9 +18,6 @@ type Props = {
  * @returns セル
  */
 export default function MsCell({ at, isOpen, count, onClick = x => { } }: Props) {
-  console.log(`MsCell at (${at.x}, ${at.y})`)
-
-
   const classNameList = ['cell']
   isOpen && classNameList.push('cell-open')
   return (
