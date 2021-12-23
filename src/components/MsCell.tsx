@@ -20,12 +20,13 @@ type Props = {
 export default function MsCell({ at, isOpen, count, onClick = x => { } }: Props) {
   const classNameList = ['cell']
   isOpen && classNameList.push('cell-open')
+
   return (
     <div
       className={classNameList.join(' ')}
       onClick={() => onClick(at)}
     >
-      {isOpen ? count : ''}
+      {isOpen && count > 0 ? count : ''}
     </div>
   );
 }
