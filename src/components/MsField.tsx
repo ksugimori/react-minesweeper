@@ -2,21 +2,20 @@ import React from 'react';
 import './MsField.scss';
 import MsCell from './MsCell';
 import Cell from '../models/Cell';
-import Field from '../models/Field';
-import Point from '../models/Point';
+import { Coordinate } from '../models/interfaces'
 
 type Props = {
-  field: Field;
-  onClickCell: (p: Point) => void
+  rows: Cell[][];
+  onClickCell: (p: Coordinate) => void
 }
 
 /**
  * フィールド
  * @returns MsField
  */
-function MsField({ field, onClickCell }: Props) {
+function MsField({ rows, onClickCell }: Props) {
   const toMsCell = (cell: Cell, x: number, y: number) => (
-    <MsCell key={cell.id} onClick={onClickCell} {...cell} />
+    <MsCell key={`${x}:${y}`} at={{ x, y }} onClick={onClickCell} {...cell} />
   );
 
   const toMsFieldRow = (cells: Cell[], y: number) => (
@@ -27,7 +26,7 @@ function MsField({ field, onClickCell }: Props) {
 
   return (
     <div className="ms-field">
-      {field.rows.map(toMsFieldRow)}
+      {rows.map(toMsFieldRow)}
     </div>
   );
 }

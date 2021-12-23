@@ -1,13 +1,15 @@
 import React from 'react';
 import './MsCell.scss';
-import Cell from '../models/Cell';
-import Point from '../models/Point';
+import { Coordinate } from '../models/interfaces'
 
 /**
  * props
  */
-type Props = Cell & {
-  onClick: (p: Point) => void
+type Props = {
+  at: Coordinate,
+  isOpen: boolean,
+  count: number,
+  onClick: (p: Coordinate) => void
 }
 
 /**
@@ -16,6 +18,9 @@ type Props = Cell & {
  * @returns セル
  */
 export default function MsCell({ at, isOpen, count, onClick = x => { } }: Props) {
+  console.log(`MsCell at (${at.x}, ${at.y})`)
+
+
   const classNameList = ['cell']
   isOpen && classNameList.push('cell-open')
   return (
