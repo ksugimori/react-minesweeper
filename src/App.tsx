@@ -6,7 +6,7 @@ function App() {
   return (
     <div className="App">
       <h1>React minesweeper</h1>
-      <MsCell isOpen={false} count={8} />
+      <MsCell count={8} />
     </div>
   );
 }

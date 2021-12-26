@@ -5,8 +5,11 @@ import './MsCell.scss';
  * props
  */
 type Props = {
-  isOpen: boolean,
   count: number,
+}
+
+type State = {
+  isOpen: boolean
 }
 
 /**
@@ -14,15 +17,31 @@ type Props = {
  * @param props 
  * @returns セル
  */
-export default function MsCell({ isOpen, count }: Props) {
-  const classNameList = ['cell']
-  isOpen && classNameList.push('cell-open')
+export default class MsCell extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = { isOpen: false };
+    this.onClick = this.onClick.bind(this);
+  }
 
-  return (
-    <div
-      className={classNameList.join(' ')}
-    >
-      {isOpen && count > 0 ? count : ''}
-    </div>
-  );
+  onClick() {
+    this.setState((state) => ({ isOpen: !state.isOpen }));
+  }
+
+  render() {
+    const { count } = this.props;
+    const { isOpen } = this.state;
+
+    const classNameList = ['cell']
+    isOpen && classNameList.push('cell-open')
+
+    return (
+      <div
+        className={classNameList.join(' ')}
+        onClick={this.onClick}
+      >
+        {isOpen && count > 0 ? count : ''}
+      </div>
+    );
+  }
 }
