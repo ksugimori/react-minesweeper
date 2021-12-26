@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './MsCell.scss';
 
 /**
@@ -8,40 +8,27 @@ type Props = {
   count: number,
 }
 
-type State = {
-  isOpen: boolean
-}
-
 /**
  * セル
  * @param props 
  * @returns セル
  */
-export default class MsCell extends React.Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { isOpen: false };
-    this.onClick = this.onClick.bind(this);
+export default function MsCell({ count }: Props) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const classNameList = ['cell']
+  isOpen && classNameList.push('cell-open')
+
+  const toggleIsOpen = () => {
+    setIsOpen(!isOpen);
   }
 
-  onClick() {
-    this.setState((state) => ({ isOpen: !state.isOpen }));
-  }
-
-  render() {
-    const { count } = this.props;
-    const { isOpen } = this.state;
-
-    const classNameList = ['cell']
-    isOpen && classNameList.push('cell-open')
-
-    return (
-      <div
-        className={classNameList.join(' ')}
-        onClick={this.onClick}
-      >
-        {isOpen && count > 0 ? count : ''}
-      </div>
-    );
-  }
+  return (
+    <div
+      className={classNameList.join(' ')}
+      onClick={toggleIsOpen}
+    >
+      {isOpen && count > 0 ? count : ''}
+    </div>
+  );
 }
