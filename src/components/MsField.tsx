@@ -11,6 +11,15 @@ interface MsFieldState {
   openCells: PointSet;
 }
 
+/**
+ * 0 から始まる連番の配列を作成する。
+ * @param length 長さ
+ * @returns 配列
+ */
+function sequence(length: number): number[] {
+  return Array.from({ length }, (e, i) => i);
+}
+
 // TODO: ランダムに設定
 const defaultMines = new PointSet()
 defaultMines.add({ x: 3, y: 0 })
@@ -28,24 +37,18 @@ export default function MsField() {
     setState({ ...state, openCells: newOpenCells })
   }
 
-
-  const rows = [];
-  for (let y = 0; y < state.height; y++) {
-    const row = [];
-    for (let x = 0; x < state.width; x++) {
-      row.push(<MsCell
-        key={x}
-        count={state.mines.countNeighbors({ x, y })}
-        isOpen={state.openCells.includes({ x, y })}
-        onClick={() => openCell({ x, y })}
-      />)
-    }
-    rows.push((
-      <div key={y} className="field-row">
-        {row}
-      </div>
-    ))
-  }
+  const rows = sequence(state.height).map(y => (
+    <div key={y} className="field-row">
+      {sequence(state.width).map(x => (
+        <MsCell
+          key={x}
+          count={state.mines.countNeighbors({ x, y })}
+          isOpen={state.openCells.includes({ x, y })}
+          onClick={() => openCell({ x, y })}
+        />
+      ))}
+    </div>
+  ));
 
   return (
     <div className="field">
