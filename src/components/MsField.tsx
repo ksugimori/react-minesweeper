@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import Coordinate from '../models/Coordinate';
+import Point from '../models/Point';
 import MsCell from "./MsCell";
 import "./MsField.scss";
 
 interface MsFieldState {
   width: number;
   height: number;
-  mines: Coordinate[];
-  openCells: Coordinate[];
+  mines: Point[];
+  openCells: Point[];
 }
 
 export default function MsField() {
