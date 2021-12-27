@@ -1,4 +1,19 @@
-.field-row {
-  display: flex;
-  flex-direction: row;
+.field-container {
+  text-align: center;
+
+  .field {
+    display: inline-block;
+  }
+
+  .field-row-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .field-row {
+      display: flex;
+      flex-direction: row;
+    }
+  }
+
 }

@@ -57,8 +57,12 @@ export default function MsField() {
   ));
 
   return (
-    <div className="field">
-      {rows}
+    <div className="field-container">
+      <div className='field'>
+        <div className='field-row-container'>
+          {rows}
+        </div>
+      </div>
     </div>
   );
 }
