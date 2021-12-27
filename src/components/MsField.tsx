@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Point from '../models/Point';
 import PointSet from '../models/PointSet';
 import MsCell from "./MsCell";
 import "./MsField.scss";
@@ -11,11 +10,15 @@ interface MsFieldState {
   openCells: PointSet;
 }
 
+// TODO: ランダムに設定
+const defaultMines = new PointSet()
+defaultMines.add({ x: 3, y: 0 })
+
 export default function MsField() {
 
 
   const [state, setState] = useState<MsFieldState>({
-    width: 9, height: 9, mines: new PointSet(), openCells: new PointSet()
+    width: 9, height: 9, mines: defaultMines, openCells: new PointSet()
   })
 
   const openCell = (i: number) => {
@@ -28,10 +31,11 @@ export default function MsField() {
   const row = [];
   for (let x = 0; x < state.width; x++) {
     const isOpen = state.openCells.includes({ x: x, y: 0 })
+    const count = state.mines.countNeighbors({ x: x, y: 0 });
 
     row.push(<MsCell
       key={x}
-      count={x} // TODO: 実際のカウントに
+      count={count}
       isOpen={isOpen}
       onClick={() => openCell(x)}
     />)
