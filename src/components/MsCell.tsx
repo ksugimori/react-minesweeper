@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './MsCell.scss';
 
 /**
  * props
  */
-type Props = {
-  count: number,
+interface Props {
+  count: number;
+  isOpen: boolean;
+  onClick: () => void;
 }
 
 /**
@@ -13,20 +15,14 @@ type Props = {
  * @param props 
  * @returns セル
  */
-export default function MsCell({ count }: Props) {
-  const [isOpen, setIsOpen] = useState(false);
-
+export default function MsCell({ count, isOpen, onClick }: Props) {
   const classNameList = ['cell']
   isOpen && classNameList.push('cell-open')
-
-  const toggleIsOpen = () => {
-    setIsOpen(!isOpen);
-  }
 
   return (
     <div
       className={classNameList.join(' ')}
-      onClick={toggleIsOpen}
+      onClick={onClick}
     >
       {isOpen && count > 0 ? count : ''}
     </div>
