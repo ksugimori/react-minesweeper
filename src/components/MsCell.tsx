@@ -7,6 +7,7 @@ import './MsCell.scss';
 interface Props {
   count: number;
   isOpen: boolean;
+  isMine: boolean;
   onClick: () => void;
 }
 
@@ -15,7 +16,7 @@ interface Props {
  * @param props 
  * @returns セル
  */
-export default function MsCell({ count, isOpen, onClick }: Props) {
+export default function MsCell({ count, isOpen, isMine, onClick }: Props) {
   const classNameList = ['cell']
   isOpen && classNameList.push('cell-open')
 
@@ -24,7 +25,18 @@ export default function MsCell({ count, isOpen, onClick }: Props) {
       className={classNameList.join(' ')}
       onClick={onClick}
     >
-      {isOpen && count > 0 ? count : ''}
+      {text(isOpen, isMine, count)}
     </div>
   );
+}
+
+function text(isOpen: boolean, isMine: boolean, count: number) {
+  if (!isOpen) {
+    return '';
+  }
+  if (isMine) {
+    return 'M'
+  }
+
+  return count > 0 ? count.toString() : ''
 }

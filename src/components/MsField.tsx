@@ -27,7 +27,6 @@ defaultMines.add({ x: 4, y: 1 })
 
 export default function MsField() {
 
-
   const [state, setState] = useState<MsFieldState>({
     width: 9, height: 9, mines: defaultMines, openCells: new PointSet()
   })
@@ -44,6 +43,7 @@ export default function MsField() {
       <MsCell
         key={x}
         count={state.mines.countNeighbors(p)}
+        isMine={state.mines.includes(p)}
         isOpen={state.openCells.includes(p)}
         onClick={() => openCell(p)}
       />
