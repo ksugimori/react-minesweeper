@@ -23,6 +23,7 @@ function sequence(length: number): number[] {
 // TODO: ランダムに設定
 const defaultMines = new PointSet()
 defaultMines.add({ x: 3, y: 0 })
+defaultMines.add({ x: 4, y: 1 })
 
 export default function MsField() {
 
@@ -37,16 +38,21 @@ export default function MsField() {
     setState({ ...state, openCells: newOpenCells })
   }
 
+  const createMsCell = (x: number, y: number) => {
+    const p = { x, y };
+    return (
+      <MsCell
+        key={x}
+        count={state.mines.countNeighbors(p)}
+        isOpen={state.openCells.includes(p)}
+        onClick={() => openCell(p)}
+      />
+    );
+  }
+
   const rows = sequence(state.height).map(y => (
     <div key={y} className="field-row">
-      {sequence(state.width).map(x => (
-        <MsCell
-          key={x}
-          count={state.mines.countNeighbors({ x, y })}
-          isOpen={state.openCells.includes({ x, y })}
-          onClick={() => openCell({ x, y })}
-        />
-      ))}
+      {sequence(state.width).map(x => createMsCell(x, y))}
     </div>
   ));
 
