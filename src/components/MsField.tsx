@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Point from '../models/Point';
 import PointSet from '../models/PointSet';
 import MsCell from "./MsCell";
 import "./MsField.scss";
@@ -21,31 +22,34 @@ export default function MsField() {
     width: 9, height: 9, mines: defaultMines, openCells: new PointSet()
   })
 
-  const openCell = (i: number) => {
+  const openCell = (p: Point) => {
     const newOpenCells = state.openCells.clone()
-    newOpenCells.add({ x: i, y: 0 });
+    newOpenCells.add(p);
     setState({ ...state, openCells: newOpenCells })
   }
 
 
-  const row = [];
-  for (let x = 0; x < state.width; x++) {
-    const isOpen = state.openCells.includes({ x: x, y: 0 })
-    const count = state.mines.countNeighbors({ x: x, y: 0 });
-
-    row.push(<MsCell
-      key={x}
-      count={count}
-      isOpen={isOpen}
-      onClick={() => openCell(x)}
-    />)
+  const rows = [];
+  for (let y = 0; y < state.height; y++) {
+    const row = [];
+    for (let x = 0; x < state.width; x++) {
+      row.push(<MsCell
+        key={x}
+        count={state.mines.countNeighbors({ x, y })}
+        isOpen={state.openCells.includes({ x, y })}
+        onClick={() => openCell({ x, y })}
+      />)
+    }
+    rows.push((
+      <div key={y} className="field-row">
+        {row}
+      </div>
+    ))
   }
 
   return (
     <div className="field">
-      <div className="field-row">
-        {row}
-      </div>
+      {rows}
     </div>
   );
 }
