@@ -23,4 +23,14 @@ export default class PointSet {
   public includes(p: Point) {
     return this.values.filter(e => e.x === p.x).some(e => e.y === p.y)
   }
+
+  /**
+   * オブジェクトのクローンを作成する。
+   * @returns 内容がコピーされたオブジェクト
+   */
+  public clone() {
+    const result = new PointSet();
+    result.values = this.values.slice()
+    return result;
+  }
 }

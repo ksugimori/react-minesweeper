@@ -25,4 +25,16 @@ describe('PointList', () => {
       expect(list.includes({ x: 10, y: 3 })).toBeFalsy()
     })
   })
+
+  describe('#clone', () => {
+    test('オブジェクトのコピーが生成されること', () => {
+      const original = new PointSet()
+      original.add({ x: 1, y: 1 })
+
+      const clone = original.clone();
+
+      expect(clone !== original).toBeTruthy();
+      expect(clone.includes({ x: 1, y: 1 })).toBeTruthy()
+    })
+  })
 });
