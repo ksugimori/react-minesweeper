@@ -39,11 +39,18 @@ export default class PointSet {
    * @param p 座標
    * @returns Point の数
    */
-  public countNeighbors(p: { x: number; y: number; }): any {
+  public countNeighbors(p: { x: number; y: number; }): number {
     const above = this.values.filter(e => e.y === p.y - 1).filter(e => e.x >= p.x - 1 && e.x <= p.x + 1).length;
     const same = this.values.filter(e => e.y === p.y).filter(e => e.x === p.x - 1 || e.x === p.x + 1).length;
     const below = this.values.filter(e => e.y === p.y + 1).filter(e => e.x >= p.x - 1 && e.x <= p.x + 1).length;
     return above + same + below;
   }
 
+  public forEach(f: (p: Point) => void) {
+    return this.values.forEach(f);
+  }
+
+  public isNotEmpty(): boolean {
+    return this.values.length > 0;
+  }
 }
