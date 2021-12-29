@@ -7,8 +7,15 @@ export default class PointSet {
   /** 内部で保持する Point の配列 */
   private values: Point[] = [];
 
+  /** Point の数 */
+  public get size(): number {
+    return this.values.length;
+  }
+
   /**
-   * Point を追加する
+   * Point を追加する。
+   * 
+   * 重複するものは追加されません。
    * @param p 座標
    */
   public add(p: Point) {
@@ -49,11 +56,11 @@ export default class PointSet {
     return above + same + below;
   }
 
+  /**
+   * 配列に変換する。
+   * @returns Point の配列
+   */
   public toArray(): Point[] {
     return this.values.slice();
-  }
-
-  public get size(): number {
-    return this.values.length;
   }
 }

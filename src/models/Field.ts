@@ -1,11 +1,26 @@
 import Cell from "./Cell";
 import Point from "./Point";
 
+/**
+ * 盤面の状態を表すクラス。
+ */
 export default class Field {
+  /** 盤の横幅 */
   public width: number;
+
+  /** 盤の高さ */
   public height: number;
+
+  /** 全てのセル。 */
   public cells: Cell[][] = [];
 
+  /**
+   * コンストラクタ。
+   * 
+   * 全セルが初期状態で作成されます。
+   * @param width 横幅
+   * @param height 高さ
+   */
   constructor(width: number, height: number) {
     this.width = width;
     this.height = height;
@@ -26,20 +41,22 @@ export default class Field {
     }
   }
 
+  /**
+   * 指定した座標のセルを取得する。
+   * @param p 座標
+   * @returns セル
+   */
   public at(p: Point): Cell {
     return this.cells[p.y][p.x]
   }
 
   /**
-   * 盤上の座標か？
+   * 周囲のセルを取得する。
+   * 
+   * 戻り値に盤外の座標のセルは含まれません。
    * @param p 座標
-   * @returns 盤上に含まれる場合は true
+   * @returns 周囲のセル
    */
-  private isInside(p: Point): boolean {
-    return p.x >= 0 && p.x < this.width
-      && p.y >= 0 && p.y < this.height
-  }
-
   public arround(p: Point): Cell[] {
     const result: Cell[] = [];
 
@@ -59,5 +76,15 @@ export default class Field {
     addIfInside({ x: p.x + 1, y: p.y + 1 });
 
     return result;
+  }
+
+  /**
+   * 盤上の座標か？
+   * @param p 座標
+   * @returns 盤上に含まれる場合は true
+   */
+  private isInside(p: Point): boolean {
+    return p.x >= 0 && p.x < this.width
+      && p.y >= 0 && p.y < this.height
   }
 }

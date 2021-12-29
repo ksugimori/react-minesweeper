@@ -1,13 +1,12 @@
 import React from 'react';
+import Cell from '../models/Cell';
 import './MsCell.scss';
 
 /**
  * props
  */
-interface Props {
-  count: number;
-  isOpen: boolean;
-  isMine: boolean;
+interface Props extends Cell {
+  /** クリック時のハンドラ */
   onClick: () => void;
 }
 
@@ -30,10 +29,22 @@ export default function MsCell({ count, isOpen, isMine, onClick }: Props) {
   );
 }
 
+// ------------------------------------------------------------
+// module private
+// ------------------------------------------------------------
+
+/**
+ * 表示するテキストを組み立てる。
+ * @param isOpen 開いているか？
+ * @param isMine 地雷が埋まっているか？
+ * @param count 周囲の地雷数
+ * @returns テキスト
+ */
 function text(isOpen: boolean, isMine: boolean, count: number) {
   if (!isOpen) {
     return '';
   }
+
   if (isMine) {
     return 'M'
   }

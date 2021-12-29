@@ -5,6 +5,9 @@ import PointSet from '../models/PointSet';
 import MsCell from "./MsCell";
 import "./MsField.scss";
 
+/**
+ * Field の状態
+ */
 interface MsFieldState {
   /** 盤の横セル数 */
   width: number;
@@ -20,15 +23,6 @@ interface MsFieldState {
 
   /** 開く必要のあるセルの座標。次回描画時に値が入っていればそれらを開く */
   openPointsQueue: PointSet;
-}
-
-/**
- * 0 から始まる連番の配列を作成する。
- * @param length 長さ
- * @returns 配列
- */
-function sequence(length: number): number[] {
-  return Array.from({ length }, (e, i) => i);
 }
 
 // TODO: ランダムに設定
@@ -54,36 +48,31 @@ export default function MsField() {
     openPointsQueue: new PointSet()
   })
 
-  const { openPointsQueue } = state;
+  const field = buildField(state);
 
-  const field = new Field(state.width, state.height);
-
-  state.openPoints.toArray().forEach(p => field.at(p).isOpen = true)
-  state.minePoints.toArray().forEach(p => {
-    field.at(p).isMine = true;
-    field.arround(p).forEach(cell => cell.count++)
-  });
-
-  if (openPointsQueue.size > 0) {
+  // キューに値が入っている場合はそれらを開く
+  if (state.openPointsQueue.size > 0) {
     const newOpenPoints = state.openPoints.clone()
     const newOpenPointsQueue = new PointSet();
 
-    openPointsQueue.toArray()
-      .forEach(p => newOpenPoints.add(p))
+    // キューに入っている座標のセルを開く
+    state.openPointsQueue.toArray()
+      .forEach(p => newOpenPoints.add(p));
 
-    openPointsQueue.toArray()
+    // それらの周囲の座標を新たにキューに入れる
+    state.openPointsQueue.toArray()
       .filter(p => field.at(p).count === 0)
       .flatMap(p => field.arround(p).map(cell => cell.at))
       .filter(p => !newOpenPoints.includes(p))
       .forEach(p => newOpenPointsQueue.add(p));
 
+    // ここで state を更新するので再描画される。キューが空になるまで再帰的に実行される
     setState({ ...state, openPoints: newOpenPoints, openPointsQueue: newOpenPointsQueue })
   }
 
   const onClickCell = (p: Point) => {
     const newOpenCells = state.openPoints.clone()
     newOpenCells.add(p);
-    openPointsQueue.toArray().forEach(e => newOpenCells.add(e));
 
     const newOpenQueue = new PointSet();
     const cell = field.at(p);
@@ -118,4 +107,33 @@ export default function MsField() {
       </div>
     </div>
   );
+}
+
+// ------------------------------------------------------------
+// module private
+// ------------------------------------------------------------
+
+/**
+ * 0 から始まる連番の配列を作成する。
+ * @param length 長さ
+ * @returns 配列
+ */
+function sequence(length: number): number[] {
+  return Array.from({ length }, (e, i) => i);
+}
+
+/**
+ * state から Field を組み立てなおす。
+ * @param state Fieldの状態
+ * @returns Field
+ */
+function buildField(state: MsFieldState) {
+  const result = new Field(state.width, state.height);
+
+  state.openPoints.toArray().forEach(p => result.at(p).isOpen = true);
+  state.minePoints.toArray().forEach(p => {
+    result.at(p).isMine = true;
+    result.arround(p).forEach(cell => cell.count++);
+  });
+  return result;
 }
