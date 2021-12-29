@@ -18,6 +18,9 @@ interface MsFieldState {
   /** 地雷の埋まっているセルの座標 */
   minePoints: PointSet;
 
+  /** フラグの立てられているセルの座標 */
+  flagPoints: PointSet;
+
   /** 開かれているセルの座標 */
   openPoints: PointSet;
 
@@ -44,6 +47,7 @@ export default function MsField() {
     width: 9,
     height: 9,
     minePoints: defaultMines,
+    flagPoints: new PointSet(),
     openPoints: new PointSet(),
     openPointsQueue: new PointSet()
   })
@@ -64,6 +68,7 @@ export default function MsField() {
       .filter(p => field.at(p).count === 0)
       .flatMap(p => field.arround(p).map(cell => cell.at))
       .filter(p => !newOpenPoints.includes(p))
+      .filter(p => !state.flagPoints.includes(p))
       .forEach(p => newOpenPointsQueue.add(p));
 
     // ここで state を更新するので再描画される。キューが空になるまで再帰的に実行される
@@ -71,24 +76,48 @@ export default function MsField() {
   }
 
   const onClickCell = (p: Point) => {
+    const cell = field.at(p);
+
+    if (cell.isFlag || cell.isOpen) {
+      return;
+    }
+
     const newOpenCells = state.openPoints.clone()
     newOpenCells.add(p);
 
     const newOpenQueue = new PointSet();
-    const cell = field.at(p);
-    if (!cell.isOpen && cell.count === 0) {
+    if (cell.count === 0) {
       field.arround(p).map(cell => cell.at)
         .filter(at => !newOpenCells.includes(at))
+        .filter(at => !state.flagPoints.includes(at))
         .forEach(at => newOpenQueue.add(at))
     }
 
     setState({ ...state, openPoints: newOpenCells, openPointsQueue: newOpenQueue })
   }
 
+  const onRightClickCell = (p: Point) => {
+    if (field.at(p).isOpen) return;
+
+    const newFlagPoints = state.flagPoints.clone();
+    if (newFlagPoints.includes(p)) {
+      newFlagPoints.remove(p);
+    } else {
+      newFlagPoints.add(p);
+    }
+
+    setState({ ...state, flagPoints: newFlagPoints })
+  }
+
   const createMsCell = (x: number, y: number) => {
     const p = { x, y };
     return (
-      <MsCell key={x} {...field.at(p)} onClick={() => onClickCell(p)} />
+      <MsCell
+        key={x}
+        {...field.at(p)}
+        onLeftClick={() => onClickCell(p)}
+        onRightClick={() => onRightClickCell(p)}
+      />
     );
   }
 
@@ -130,10 +159,14 @@ function sequence(length: number): number[] {
 function buildField(state: MsFieldState) {
   const result = new Field(state.width, state.height);
 
-  state.openPoints.toArray().forEach(p => result.at(p).isOpen = true);
   state.minePoints.toArray().forEach(p => {
     result.at(p).isMine = true;
     result.arround(p).forEach(cell => cell.count++);
   });
+  state.openPoints.toArray().forEach(p => result.at(p).isOpen = true);
+  state.flagPoints.toArray()
+    .filter(p => !state.openPoints.includes(p))
+    .forEach(p => result.at(p).isFlag = true);
+
   return result;
 }

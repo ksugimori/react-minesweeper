@@ -26,6 +26,14 @@ export default class PointSet {
   }
 
   /**
+   * Point を削除する。
+   * @param p 座標
+   */
+  public remove(p: Point) {
+    this.values = this.values.filter(e => e.x !== p.x || e.y !== p.y);
+  }
+
+  /**
    * 引数に渡された座標が存在するか？
    * @param p 座標
    * @returns 含まれていれば true
