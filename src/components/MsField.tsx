@@ -6,11 +6,20 @@ import MsCell from "./MsCell";
 import "./MsField.scss";
 
 interface MsFieldState {
+  /** 盤の横セル数 */
   width: number;
+
+  /** 盤の縦セル数 */
   height: number;
-  mines: PointSet;
-  openCells: PointSet;
-  openQueue: PointSet;
+
+  /** 地雷の埋まっているセルの座標 */
+  minePoints: PointSet;
+
+  /** 開かれているセルの座標 */
+  openPoints: PointSet;
+
+  /** 開く必要のあるセルの座標。次回描画時に値が入っていればそれらを開く */
+  openPointsQueue: PointSet;
 }
 
 /**
@@ -31,52 +40,50 @@ defaultMines.add({ x: 8, y: 1 })
 defaultMines.add({ x: 7, y: 2 })
 defaultMines.add({ x: 8, y: 2 })
 
+/**
+ * ゲームの盤面を表すコンポーネント。
+ * @returns Field
+ */
 export default function MsField() {
 
   const [state, setState] = useState<MsFieldState>({
     width: 9,
     height: 9,
-    mines: defaultMines,
-    openCells: new PointSet(),
-    openQueue: new PointSet()
+    minePoints: defaultMines,
+    openPoints: new PointSet(),
+    openPointsQueue: new PointSet()
   })
 
-  const { openQueue } = state;
+  const { openPointsQueue } = state;
 
   const field = new Field(state.width, state.height);
 
-  state.openCells.toArray().forEach(p => field.at(p).isOpen = true)
-  state.mines.toArray().forEach(p => {
+  state.openPoints.toArray().forEach(p => field.at(p).isOpen = true)
+  state.minePoints.toArray().forEach(p => {
     field.at(p).isMine = true;
     field.arround(p).forEach(cell => cell.count++)
   });
 
-  if (openQueue.size > 0) {
+  if (openPointsQueue.size > 0) {
+    const newOpenPoints = state.openPoints.clone()
+    const newOpenPointsQueue = new PointSet();
 
-    console.log('length = ' + openQueue.size)
+    openPointsQueue.toArray()
+      .forEach(p => newOpenPoints.add(p))
 
-    const newOpenCells = state.openCells.clone()
-    const newOpenQueue = new PointSet();
-
-    openQueue.toArray()
-      .filter(p => !newOpenCells.includes(p))
-      .forEach(p => newOpenCells.add(p))
-
-    openQueue.toArray()
+    openPointsQueue.toArray()
       .filter(p => field.at(p).count === 0)
-      .forEach(p => {
-        field.arround(p).map(cell => cell.at)
-          .filter(at => !newOpenCells.includes(at))
-          .forEach(at => newOpenQueue.add(at))
-      })
+      .flatMap(p => field.arround(p).map(cell => cell.at))
+      .filter(p => !newOpenPoints.includes(p))
+      .forEach(p => newOpenPointsQueue.add(p));
 
-    setState({ ...state, openCells: newOpenCells, openQueue: newOpenQueue })
+    setState({ ...state, openPoints: newOpenPoints, openPointsQueue: newOpenPointsQueue })
   }
 
-  const openCell = (p: Point) => {
-    const newOpenCells = state.openCells.clone()
+  const onClickCell = (p: Point) => {
+    const newOpenCells = state.openPoints.clone()
     newOpenCells.add(p);
-    openQueue.toArray().forEach(e => newOpenCells.add(e));
+    openPointsQueue.toArray().forEach(e => newOpenCells.add(e));
 
     const newOpenQueue = new PointSet();
     const cell = field.at(p);
@@ -86,13 +93,13 @@ export default function MsField() {
         .forEach(at => newOpenQueue.add(at))
     }
 
-    setState({ ...state, openCells: newOpenCells, openQueue: newOpenQueue })
+    setState({ ...state, openPoints: newOpenCells, openPointsQueue: newOpenQueue })
   }
 
   const createMsCell = (x: number, y: number) => {
     const p = { x, y };
     return (
-      <MsCell key={x} {...field.at(p)} onClick={() => openCell(p)} />
+      <MsCell key={x} {...field.at(p)} onClick={() => onClickCell(p)} />
     );
   }
 
