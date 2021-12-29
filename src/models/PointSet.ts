@@ -12,6 +12,9 @@ export default class PointSet {
    * @param p 座標
    */
   public add(p: Point) {
+    if (this.includes(p)) {
+      return;
+    }
     this.values.push(p);
   }
 
@@ -46,11 +49,11 @@ export default class PointSet {
     return above + same + below;
   }
 
-  public forEach(f: (p: Point) => void) {
-    return this.values.forEach(f);
+  public toArray(): Point[] {
+    return this.values.slice();
   }
 
-  public isNotEmpty(): boolean {
-    return this.values.length > 0;
+  public get size(): number {
+    return this.values.length;
   }
 }
