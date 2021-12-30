@@ -63,7 +63,7 @@ export default function MsField() {
     state.openPointsQueue.toArray()
       .forEach(p => newOpenPoints.add(p));
 
-    // それらの周囲の座標を新たにキューに入れる
+    // 開いたセルがまた空白セルなら、周囲の座標を新たにキューに入れる
     state.openPointsQueue.toArray()
       .filter(p => field.at(p).count === 0)
       .flatMap(p => field.arround(p).map(cell => cell.at))
@@ -71,29 +71,44 @@ export default function MsField() {
       .filter(p => !state.flagPoints.includes(p))
       .forEach(p => newOpenPointsQueue.add(p));
 
-    // ここで state を更新するので再描画される。キューが空になるまで再帰的に実行される
+    // ここで state を更新するので再び MsField が実行される。キューが空になるまで再帰的に実行される
     setState({ ...state, openPoints: newOpenPoints, openPointsQueue: newOpenPointsQueue })
   }
 
   const onClickCell = (p: Point) => {
     const cell = field.at(p);
+    const newOpenPoints = state.openPoints.clone();
+    const newOpenPointsQueue = new PointSet();
 
-    if (cell.isFlag || cell.isOpen) {
+    if (cell.isFlag) {
       return;
     }
 
-    const newOpenCells = state.openPoints.clone()
-    newOpenCells.add(p);
+    // すでに開かれてるセルの場合、
+    if (cell.isOpen && cell.count > 0) {
+      // count と同じ数のフラグが立てられていれば、それ以外のセルは開く
+      if (cell.count === field.arround(p).filter(cell => cell.isFlag).length) {
+        field.arround(p).map(cell => cell.at)
+          .filter(at => !newOpenPoints.includes(at))
+          .filter(at => !state.flagPoints.includes(at))
+          .forEach(at => newOpenPoints.add(at));
 
-    const newOpenQueue = new PointSet();
-    if (cell.count === 0) {
-      field.arround(p).map(cell => cell.at)
-        .filter(at => !newOpenCells.includes(at))
-        .filter(at => !state.flagPoints.includes(at))
-        .forEach(at => newOpenQueue.add(at))
+        setState({ ...state, openPoints: newOpenPoints })
+
+        return;
+      }
     }
 
-    setState({ ...state, openPoints: newOpenCells, openPointsQueue: newOpenQueue })
+    newOpenPoints.add(p);
+
+    if (cell.count === 0) {
+      field.arround(p).map(cell => cell.at)
+        .filter(at => !newOpenPoints.includes(at))
+        .filter(at => !state.flagPoints.includes(at))
+        .forEach(at => newOpenPointsQueue.add(at))
+    }
+
+    setState({ ...state, openPoints: newOpenPoints, openPointsQueue: newOpenPointsQueue })
   }
 
   const onRightClickCell = (p: Point) => {
@@ -109,6 +124,9 @@ export default function MsField() {
     setState({ ...state, flagPoints: newFlagPoints })
   }
 
+  // ----------------------------------------------------------
+  // ここから下はビューの組み立て
+  // ----------------------------------------------------------
   const createMsCell = (x: number, y: number) => {
     const p = { x, y };
     return (
