@@ -75,8 +75,8 @@ export default function MsField() {
     setState({ ...state, openPoints: newOpenPoints, openPointsQueue: newOpenPointsQueue })
   }
 
-  const onClickCell = (p: Point) => {
-    const cell = field.at(p);
+  const onClickCell = (clickedPoint: Point) => {
+    const cell = field.at(clickedPoint);
     const newOpenPoints = state.openPoints.clone();
     const newOpenPointsQueue = new PointSet();
 
@@ -87,11 +87,11 @@ export default function MsField() {
     // すでに開かれてるセルの場合、
     if (cell.isOpen && cell.count > 0) {
       // count と同じ数のフラグが立てられていれば、それ以外のセルは開く
-      if (cell.count === field.arround(p).filter(cell => cell.isFlag).length) {
-        field.arround(p).map(cell => cell.at)
-          .filter(at => !newOpenPoints.includes(at))
-          .filter(at => !state.flagPoints.includes(at))
-          .forEach(at => newOpenPoints.add(at));
+      if (cell.count === field.arround(clickedPoint).filter(cell => cell.isFlag).length) {
+        field.arround(clickedPoint).map(cell => cell.at)
+          .filter(p => !newOpenPoints.includes(p))
+          .filter(p => !state.flagPoints.includes(p))
+          .forEach(p => newOpenPoints.add(p));
 
         setState({ ...state, openPoints: newOpenPoints })
 
@@ -99,13 +99,13 @@ export default function MsField() {
       }
     }
 
-    newOpenPoints.add(p);
+    newOpenPoints.add(clickedPoint);
 
     if (cell.count === 0) {
-      field.arround(p).map(cell => cell.at)
-        .filter(at => !newOpenPoints.includes(at))
-        .filter(at => !state.flagPoints.includes(at))
-        .forEach(at => newOpenPointsQueue.add(at))
+      field.arround(clickedPoint).map(cell => cell.at)
+        .filter(p => !newOpenPoints.includes(p))
+        .filter(p => !state.flagPoints.includes(p))
+        .forEach(p => newOpenPointsQueue.add(p))
     }
 
     setState({ ...state, openPoints: newOpenPoints, openPointsQueue: newOpenPointsQueue })
@@ -129,10 +129,11 @@ export default function MsField() {
   // ----------------------------------------------------------
   const createMsCell = (x: number, y: number) => {
     const p = { x, y };
+    const cell = field.at(p);
     return (
       <MsCell
         key={x}
-        {...field.at(p)}
+        {...cell}
         onLeftClick={() => onClickCell(p)}
         onRightClick={() => onRightClickCell(p)}
       />
