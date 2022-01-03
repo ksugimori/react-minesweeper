@@ -28,9 +28,6 @@ interface MsFieldState {
 
   /** 開かれているセルの座標 */
   openPoints: PointSet;
-
-  /** 開く必要のあるセルの座標。次回描画時に値が入っていればそれらを開く */
-  openPointsQueue: PointSet;
 }
 
 // TODO: ランダムに設定
@@ -51,31 +48,34 @@ export default function MsField({ width, height }: Props) {
   const [state, setState] = useState<MsFieldState>({
     minePoints: defaultMines,
     flagPoints: new PointSet(),
-    openPoints: new PointSet(),
-    openPointsQueue: new PointSet()
+    openPoints: new PointSet()
   })
+
+  // 開く必要のあるセルの座標。次回描画時に値が入っていればそれらを開く
+  const [queue, setQueue] = useState(new PointSet());
 
   const field = buildField(width, height, state);
 
   // キューに値が入っている場合はそれらを開く
-  if (state.openPointsQueue.size > 0) {
+  if (queue.size > 0) {
     const newOpenPoints = state.openPoints.clone()
-    const newOpenPointsQueue = new PointSet();
+    const newQueue = new PointSet();
 
     // キューに入っている座標のセルを開く
-    state.openPointsQueue.toArray()
+    queue.toArray()
       .forEach(p => newOpenPoints.add(p));
 
     // 開いたセルがまた空白セルなら、周囲の座標を新たにキューに入れる
-    state.openPointsQueue.toArray()
+    queue.toArray()
       .filter(p => field.at(p).count === 0)
       .flatMap(p => field.arround(p).map(cell => cell.at))
       .filter(p => !newOpenPoints.includes(p))
       .filter(p => !state.flagPoints.includes(p))
-      .forEach(p => newOpenPointsQueue.add(p));
+      .forEach(p => newQueue.add(p));
 
     // ここで state を更新するので再び MsField が実行される。キューが空になるまで再帰的に実行される
-    setState({ ...state, openPoints: newOpenPoints, openPointsQueue: newOpenPointsQueue })
+    setState({ ...state, openPoints: newOpenPoints });
+    setQueue(newQueue);
   }
 
   const onClickCell = (clickedPoint: Point) => {
@@ -111,7 +111,8 @@ export default function MsField({ width, height }: Props) {
         .forEach(p => newOpenPointsQueue.add(p))
     }
 
-    setState({ ...state, openPoints: newOpenPoints, openPointsQueue: newOpenPointsQueue })
+    setState({ ...state, openPoints: newOpenPoints });
+    setQueue(newOpenPointsQueue);
   }
 
   const onRightClickCell = (p: Point) => {
