@@ -38,23 +38,4 @@ describe('PointList', () => {
     })
   })
 
-  describe('#countNeighbors', () => {
-    test('隣接する座標がカウントされること', () => {
-      const points = new PointSet()
-      points.add({ x: 0, y: 0 })
-      points.add({ x: 1, y: 0 })
-      points.add({ x: 2, y: 0 })
-      points.add({ x: 0, y: 1 })
-      points.add({ x: 1, y: 1 })
-      points.add({ x: 2, y: 1 })
-      points.add({ x: 0, y: 2 })
-      points.add({ x: 1, y: 2 })
-      points.add({ x: 2, y: 2 })
-
-      // テスト
-      expect(points.countNeighbors({ x: 1, y: 1 })).toBe(8)
-      expect(points.countNeighbors({ x: 3, y: 3 })).toBe(1)
-      expect(points.countNeighbors({ x: 4, y: 0 })).toBe(0)
-    })
-  })
 });

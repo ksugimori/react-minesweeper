@@ -53,18 +53,6 @@ export default class PointSet {
   }
 
   /**
-   * 周囲の Point を数える
-   * @param p 座標
-   * @returns Point の数
-   */
-  public countNeighbors(p: { x: number; y: number; }): number {
-    const above = this.values.filter(e => e.y === p.y - 1).filter(e => e.x >= p.x - 1 && e.x <= p.x + 1).length;
-    const same = this.values.filter(e => e.y === p.y).filter(e => e.x === p.x - 1 || e.x === p.x + 1).length;
-    const below = this.values.filter(e => e.y === p.y + 1).filter(e => e.x >= p.x - 1 && e.x <= p.x + 1).length;
-    return above + same + below;
-  }
-
-  /**
    * 配列に変換する。
    * @returns Point の配列
    */
