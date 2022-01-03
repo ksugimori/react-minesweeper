@@ -6,15 +6,20 @@ import MsCell from "./MsCell";
 import "./MsField.scss";
 
 /**
- * Field の状態
+ * 親要素から渡される props
  */
-interface MsFieldState {
+interface Props {
   /** 盤の横セル数 */
   width: number;
 
   /** 盤の縦セル数 */
   height: number;
+}
 
+/**
+ * Field の状態
+ */
+interface MsFieldState {
   /** 地雷の埋まっているセルの座標 */
   minePoints: PointSet;
 
@@ -41,18 +46,16 @@ defaultMines.add({ x: 8, y: 2 })
  * ゲームの盤面を表すコンポーネント。
  * @returns Field
  */
-export default function MsField() {
+export default function MsField({ width, height }: Props) {
 
   const [state, setState] = useState<MsFieldState>({
-    width: 9,
-    height: 9,
     minePoints: defaultMines,
     flagPoints: new PointSet(),
     openPoints: new PointSet(),
     openPointsQueue: new PointSet()
   })
 
-  const field = buildField(state);
+  const field = buildField(width, height, state);
 
   // キューに値が入っている場合はそれらを開く
   if (state.openPointsQueue.size > 0) {
@@ -140,9 +143,9 @@ export default function MsField() {
     );
   }
 
-  const rows = sequence(state.height).map(y => (
+  const rows = sequence(height).map(y => (
     <div key={y} className="field-row">
-      {sequence(state.width).map(x => createMsCell(x, y))}
+      {sequence(width).map(x => createMsCell(x, y))}
     </div>
   ));
 
@@ -172,11 +175,13 @@ function sequence(length: number): number[] {
 
 /**
  * state から Field を組み立てなおす。
+ * @param width 横幅
+ * @param height 高さ
  * @param state Fieldの状態
  * @returns Field
  */
-function buildField(state: MsFieldState) {
-  const result = new Field(state.width, state.height);
+function buildField(width: number, height: number, state: MsFieldState) {
+  const result = new Field(width, height);
 
   state.minePoints.toArray().forEach(p => {
     result.at(p).isMine = true;
