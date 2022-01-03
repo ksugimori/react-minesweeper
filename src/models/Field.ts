@@ -1,119 +1,90 @@
-import Cell from './Cell';
-import Point from './util/Point';
+import Cell from "./Cell";
+import Point from "./Point";
 
 /**
- * 盤面
- *
- * このクラスには幾何学的な情報、操作のみを持ち、ゲームに関する知識は極力持たないようにする。
+ * 盤面の状態を表すクラス。
  */
 export default class Field {
-  /** 横幅 */
+  /** 盤の横幅 */
   public width: number;
 
-  /** 高さ */
+  /** 盤の高さ */
   public height: number;
 
-  /** 行ごとのセル */
-  public rows: Cell[][];
+  /** 全てのセル。 */
+  public cells: Cell[][] = [];
 
   /**
-   * コンストラクタ
-   * @param width 幅
+   * コンストラクタ。
+   * 
+   * 全セルが初期状態で作成されます。
+   * @param width 横幅
    * @param height 高さ
    */
-  constructor()
-  constructor(width: number, height: number)
-  constructor(width?: number, height?: number) {
-    this.width = width || 0;
-    this.height = height || 0;
-    this.rows = [];
+  constructor(width: number, height: number) {
+    this.width = width;
+    this.height = height;
 
-    for (let y = 0; y < this.height; y++) {
-      let row: Cell[] = [];
-      for (let x = 0; x < this.width; x++) {
-        row.push(new Cell());
+    for (let y = 0; y < height; y++) {
+      const row: Cell[] = [];
+      for (let x = 0; x < width; x++) {
+        row[x] = {
+          at: { x, y },
+          count: 0,
+          isMine: false,
+          isOpen: false,
+          isFlag: false
+        };
       }
-      this.rows.push(row);
+
+      this.cells[y] = row;
     }
   }
 
   /**
-   * 指定した座標のセルを取得する
-   * @param point
+   * 指定した座標のセルを取得する。
+   * @param p 座標
+   * @returns セル
    */
-  cellAt(point: Point): Cell | undefined {
-    if (contains(this, point)) {
-      return this.rows[point.y][point.x];
-    } else {
-      return undefined;
-    }
+  public at(p: Point): Cell {
+    return this.cells[p.y][p.x]
   }
 
   /**
-   * 範囲内の座標すべてを配列として取得する
-   * @param filterFunc Cell を引数にとるフィルタリング関数
+   * 周囲のセルを取得する。
+   * 
+   * 戻り値に盤外の座標のセルは含まれません。
+   * @param p 座標
+   * @returns 周囲のセル
    */
-  points(filterFunc?: (c: Cell) => boolean) {
-    let result = [];
-    for (let x = 0; x < this.width; x++) {
-      for (let y = 0; y < this.height; y++) {
-        result.push(Point.of(x, y));
-      }
+  public arround(p: Point): Cell[] {
+    const result: Cell[] = [];
+
+    const addIfInside = (tmp: Point) => {
+      this.isInside(tmp) && result.push(this.at(tmp));
     }
 
-    return filterByCell(this, result, filterFunc);
+    addIfInside({ x: p.x - 1, y: p.y - 1 });
+    addIfInside({ x: p.x - 1, y: p.y });
+    addIfInside({ x: p.x - 1, y: p.y + 1 });
+
+    addIfInside({ x: p.x, y: p.y - 1 });
+    addIfInside({ x: p.x, y: p.y + 1 });
+
+    addIfInside({ x: p.x + 1, y: p.y - 1 });
+    addIfInside({ x: p.x + 1, y: p.y });
+    addIfInside({ x: p.x + 1, y: p.y + 1 });
+
+    return result;
   }
 
   /**
-   * 周囲の座標を配列にして取得する。
-   * @param center 座標
-   * @param filterFunc Cell を引数にとるフィルタリング関数
+   * 盤上の座標か？
+   * @param p 座標
+   * @returns 盤上に含まれる場合は true
    */
-  pointsArround(center: Point, filterFunc?: (c: Cell) => boolean) {
-    let points = [
-      // ひとつ上の行
-      center.addY(-1).addX(-1),
-      center.addY(-1),
-      center.addY(-1).addX(1),
-      // 同じ行
-      center.addX(-1),
-      center.addX(1),
-      // ひとつ下の行
-      center.addY(1).addX(-1),
-      center.addY(1),
-      center.addY(1).addX(1)
-    ].filter(p => contains(this, p));
-
-    return filterByCell(this, points, filterFunc);
-  }
-}
-
-// -----------------------------------------------------
-// private
-// -----------------------------------------------------
-
-/**
- * フィールド内の座標か？
- * @param field フィールド
- * @param p 座標
- */
-function contains(field: Field, p: Point) {
-  return (p.x >= 0 && p.x < field.width) && (p.y >= 0 && p.y < field.height);
-}
-
-/**
- * 配列をセルに対する条件でフィルタリングする
- * @param field フィールド
- * @param points Point の配列
- * @param filterFunc Cell を引数にとるフィルタリング関数
- */
-function filterByCell(field: Field, points: Point[], filterFunc?: (c: Cell) => boolean) {
-  if (filterFunc) {
-    return points.filter(p => {
-      const cell = field.cellAt(p);
-      return (!cell) ? false : filterFunc(cell);
-    });
-  } else {
-    return points;
+  private isInside(p: Point): boolean {
+    return p.x >= 0 && p.x < this.width
+      && p.y >= 0 && p.y < this.height
   }
 }

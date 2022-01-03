@@ -1,10 +1,19 @@
-@import '../variables.scss';
+.field-container {
+  text-align: center;
 
-.ms-field-row {
-  display: flex;
-  flex-direction: row;
-}
+  .field {
+    display: inline-block;
+  }
 
-.ms-field {
-  border: 0.1em solid $main-color;
+  .field-row-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .field-row {
+      display: flex;
+      flex-direction: row;
+    }
+  }
+
 }
