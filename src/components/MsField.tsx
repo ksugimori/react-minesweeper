@@ -31,6 +31,7 @@ interface MsFieldState {
 }
 
 // TODO: ランダムに設定
+// TODO: これを gameSlice.ts に。
 const defaultMines = new PointSet()
 defaultMines.add({ x: 3, y: 0 })
 defaultMines.add({ x: 4, y: 1 })
