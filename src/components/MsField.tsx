@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Field from '../models/Field';
 import Point from '../models/Point';
 import PointSet from '../models/PointSet';
@@ -58,7 +58,11 @@ export default function MsField({ width, height }: Props) {
   const field = buildField(width, height, state);
 
   // キューに値が入っている場合はそれらを開く
-  if (queue.size > 0) {
+  useEffect(() => {
+    if (queue.size <= 0) {
+      return
+    }
+
     const newOpenPoints = state.openPoints.clone()
     const newQueue = new PointSet();
 
@@ -75,9 +79,13 @@ export default function MsField({ width, height }: Props) {
       .forEach(p => newQueue.add(p));
 
     // ここで state を更新するので再び MsField が実行される。キューが空になるまで再帰的に実行される
-    setState({ ...state, openPoints: newOpenPoints });
-    setQueue(newQueue);
-  }
+    const timer = setTimeout(() => {
+      setState({ ...state, openPoints: newOpenPoints });
+      setQueue(newQueue);
+    }, 60)
+
+    return () => clearTimeout(timer)
+  });
 
   const onClickCell = (clickedPoint: Point) => {
     const cell = field.at(clickedPoint);
