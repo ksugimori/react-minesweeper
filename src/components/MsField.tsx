@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { GameState } from '../app/App.interface';
 import Field from '../models/Field';
 import Point from '../models/Point';
 import MsCell from "./MsCell";
+import {
+  selectMinePoints,
+  selectFlagPoints,
+  selectOpenPoints,
+  setOpenPoints,
+  setFlagPoints
+} from '../features/game/gameSlice';
 import "./MsField.scss";
 
 /**
@@ -16,46 +25,21 @@ interface Props {
 }
 
 /**
- * Field の状態
- */
-interface MsFieldState {
-  /** 地雷の埋まっているセルの座標 */
-  minePoints: Point[];
-
-  /** フラグの立てられているセルの座標 */
-  flagPoints: Point[];
-
-  /** 開かれているセルの座標 */
-  openPoints: Point[];
-}
-
-// TODO: ランダムに設定
-// TODO: これを gameSlice.ts に。
-const defaultMines: Point[] = [
-  { x: 3, y: 0 },
-  { x: 4, y: 1 },
-  { x: 8, y: 0 },
-  { x: 8, y: 1 },
-  { x: 7, y: 2 },
-  { x: 8, y: 2 }
-]
-
-/**
  * ゲームの盤面を表すコンポーネント。
  * @returns Field
  */
 export default function MsField({ width, height }: Props) {
 
-  const [state, setState] = useState<MsFieldState>({
-    minePoints: defaultMines,
-    flagPoints: [],
-    openPoints: []
-  })
+  const dispatch = useDispatch();
+
+  const minePoints = useSelector(selectMinePoints);
+  const flagPoints = useSelector(selectFlagPoints);
+  const openPoints = useSelector(selectOpenPoints);
 
   // 開く必要のあるセルの座標。次回描画時に値が入っていればそれらを開く
   const [queue, setQueue] = useState<Point[]>([]);
 
-  const field = buildField(width, height, state);
+  const field = buildField(width, height, { minePoints, flagPoints, openPoints });
 
   // キューに値が入っている場合はそれらを開く
   useEffect(() => {
@@ -63,7 +47,7 @@ export default function MsField({ width, height }: Props) {
       return
     }
 
-    const newOpenPoints = state.openPoints.slice();
+    const newOpenPoints = openPoints.slice();
     const newQueue: Point[] = [];
 
     // キューに入っている座標のセルを開く
@@ -74,12 +58,12 @@ export default function MsField({ width, height }: Props) {
     queue.filter(p => field.at(p).count === 0)
       .flatMap(p => field.arround(p).map(cell => cell.at))
       .filter(p => !includes(p, newOpenPoints))
-      .filter(p => !includes(p, state.flagPoints))
+      .filter(p => !includes(p, flagPoints))
       .filter(p => includes(p, newQueue) || newQueue.push(p));
 
     // ここで state を更新するので再び MsField が実行される。キューが空になるまで再帰的に実行される
     const timer = setTimeout(() => {
-      setState({ ...state, openPoints: newOpenPoints });
+      dispatch(setOpenPoints(newOpenPoints));
       setQueue(newQueue);
     }, 60)
 
@@ -88,7 +72,7 @@ export default function MsField({ width, height }: Props) {
 
   const onClickCell = (clickedPoint: Point) => {
     const cell = field.at(clickedPoint);
-    const newOpenPoints = state.openPoints.slice();
+    const newOpenPoints = openPoints.slice();
     const newOpenPointsQueue: Point[] = [];
 
     if (cell.isFlag) {
@@ -101,10 +85,10 @@ export default function MsField({ width, height }: Props) {
       if (cell.count === field.arround(clickedPoint).filter(cell => cell.isFlag).length) {
         field.arround(clickedPoint).map(cell => cell.at)
           .filter(p => !includes(p, newOpenPoints))
-          .filter(p => !includes(p, state.flagPoints))
+          .filter(p => !includes(p, flagPoints))
           .forEach(p => newOpenPoints.push(p));
 
-        setState({ ...state, openPoints: newOpenPoints })
+        dispatch(setOpenPoints(newOpenPoints));
 
         return;
       }
@@ -117,18 +101,17 @@ export default function MsField({ width, height }: Props) {
     if (cell.count === 0) {
       field.arround(clickedPoint).map(cell => cell.at)
         .filter(p => !includes(p, newOpenPoints))
-        .filter(p => !includes(p, state.flagPoints))
+        .filter(p => !includes(p, flagPoints))
         .forEach(p => includes(p, newOpenPointsQueue) || newOpenPointsQueue.push(p))
     }
 
-    setState({ ...state, openPoints: newOpenPoints });
+    dispatch(setOpenPoints(newOpenPoints));
     setQueue(newOpenPointsQueue);
   }
 
   const onRightClickCell = (p: Point) => {
     if (field.at(p).isOpen) return;
 
-    const flagPoints = state.flagPoints;
     let newFlagPoints: Point[];
     if (includes(p, flagPoints)) {
       newFlagPoints = flagPoints.filter(e => e.x !== p.x && e.y !== p.y)
@@ -136,7 +119,7 @@ export default function MsField({ width, height }: Props) {
       newFlagPoints = [...flagPoints, p];
     }
 
-    setState({ ...state, flagPoints: newFlagPoints })
+    dispatch(setFlagPoints(newFlagPoints))
   }
 
   // ----------------------------------------------------------
@@ -192,7 +175,7 @@ function sequence(length: number): number[] {
  * @param state Fieldの状態
  * @returns Field
  */
-function buildField(width: number, height: number, state: MsFieldState) {
+function buildField(width: number, height: number, state: GameState) {
   const result = new Field(width, height);
 
   state.minePoints.forEach(p => {

@@ -3,6 +3,6 @@ import gameReducer from '../features/game/gameSlice'
 
 export default configureStore({
   reducer: {
-    posts: gameReducer
+    game: gameReducer
   }
 })
