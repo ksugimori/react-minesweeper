@@ -1,8 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { GameState } from '../app/App.interface';
 import Field from '../models/Field';
 import Point from '../models/Point';
-import PointSet from '../models/PointSet';
 import MsCell from "./MsCell";
+import {
+  selectMinePoints,
+  selectFlagPoints,
+  selectOpenPoints,
+  setOpenPoints,
+  setFlagPoints
+} from '../features/game/gameSlice';
 import "./MsField.scss";
 
 /**
@@ -17,71 +25,55 @@ interface Props {
 }
 
 /**
- * Field の状態
- */
-interface MsFieldState {
-  /** 地雷の埋まっているセルの座標 */
-  minePoints: PointSet;
-
-  /** フラグの立てられているセルの座標 */
-  flagPoints: PointSet;
-
-  /** 開かれているセルの座標 */
-  openPoints: PointSet;
-}
-
-// TODO: ランダムに設定
-const defaultMines = new PointSet()
-defaultMines.add({ x: 3, y: 0 })
-defaultMines.add({ x: 4, y: 1 })
-defaultMines.add({ x: 8, y: 0 })
-defaultMines.add({ x: 8, y: 1 })
-defaultMines.add({ x: 7, y: 2 })
-defaultMines.add({ x: 8, y: 2 })
-
-/**
  * ゲームの盤面を表すコンポーネント。
  * @returns Field
  */
 export default function MsField({ width, height }: Props) {
 
-  const [state, setState] = useState<MsFieldState>({
-    minePoints: defaultMines,
-    flagPoints: new PointSet(),
-    openPoints: new PointSet()
-  })
+  const dispatch = useDispatch();
+
+  const minePoints = useSelector(selectMinePoints);
+  const flagPoints = useSelector(selectFlagPoints);
+  const openPoints = useSelector(selectOpenPoints);
 
   // 開く必要のあるセルの座標。次回描画時に値が入っていればそれらを開く
-  const [queue, setQueue] = useState(new PointSet());
+  const [queue, setQueue] = useState<Point[]>([]);
 
-  const field = buildField(width, height, state);
+  const field = buildField(width, height, { minePoints, flagPoints, openPoints });
 
   // キューに値が入っている場合はそれらを開く
-  if (queue.size > 0) {
-    const newOpenPoints = state.openPoints.clone()
-    const newQueue = new PointSet();
+  useEffect(() => {
+    if (queue.length <= 0) {
+      return
+    }
+
+    const newOpenPoints = openPoints.slice();
+    const newQueue: Point[] = [];
 
     // キューに入っている座標のセルを開く
-    queue.toArray()
-      .forEach(p => newOpenPoints.add(p));
+    queue.filter(p => !includes(p, newOpenPoints))
+      .forEach(p => newOpenPoints.push(p));
 
     // 開いたセルがまた空白セルなら、周囲の座標を新たにキューに入れる
-    queue.toArray()
-      .filter(p => field.at(p).count === 0)
+    queue.filter(p => field.at(p).count === 0)
       .flatMap(p => field.arround(p).map(cell => cell.at))
-      .filter(p => !newOpenPoints.includes(p))
-      .filter(p => !state.flagPoints.includes(p))
-      .forEach(p => newQueue.add(p));
+      .filter(p => !includes(p, newOpenPoints))
+      .filter(p => !includes(p, flagPoints))
+      .filter(p => includes(p, newQueue) || newQueue.push(p));
 
     // ここで state を更新するので再び MsField が実行される。キューが空になるまで再帰的に実行される
-    setState({ ...state, openPoints: newOpenPoints });
-    setQueue(newQueue);
-  }
+    const timer = setTimeout(() => {
+      dispatch(setOpenPoints(newOpenPoints));
+      setQueue(newQueue);
+    }, 60)
+
+    return () => clearTimeout(timer)
+  });
 
   const onClickCell = (clickedPoint: Point) => {
     const cell = field.at(clickedPoint);
-    const newOpenPoints = state.openPoints.clone();
-    const newOpenPointsQueue = new PointSet();
+    const newOpenPoints = openPoints.slice();
+    const newOpenPointsQueue: Point[] = [];
 
     if (cell.isFlag) {
       return;
@@ -92,40 +84,42 @@ export default function MsField({ width, height }: Props) {
       // count と同じ数のフラグが立てられていれば、それ以外のセルは開く
       if (cell.count === field.arround(clickedPoint).filter(cell => cell.isFlag).length) {
         field.arround(clickedPoint).map(cell => cell.at)
-          .filter(p => !newOpenPoints.includes(p))
-          .filter(p => !state.flagPoints.includes(p))
-          .forEach(p => newOpenPoints.add(p));
+          .filter(p => !includes(p, newOpenPoints))
+          .filter(p => !includes(p, flagPoints))
+          .forEach(p => newOpenPoints.push(p));
 
-        setState({ ...state, openPoints: newOpenPoints })
+        dispatch(setOpenPoints(newOpenPoints));
 
         return;
       }
     }
 
-    newOpenPoints.add(clickedPoint);
+    if (!includes(clickedPoint, newOpenPoints)) {
+      newOpenPoints.push(clickedPoint);
+    }
 
     if (cell.count === 0) {
       field.arround(clickedPoint).map(cell => cell.at)
-        .filter(p => !newOpenPoints.includes(p))
-        .filter(p => !state.flagPoints.includes(p))
-        .forEach(p => newOpenPointsQueue.add(p))
+        .filter(p => !includes(p, newOpenPoints))
+        .filter(p => !includes(p, flagPoints))
+        .forEach(p => includes(p, newOpenPointsQueue) || newOpenPointsQueue.push(p))
     }
 
-    setState({ ...state, openPoints: newOpenPoints });
+    dispatch(setOpenPoints(newOpenPoints));
     setQueue(newOpenPointsQueue);
   }
 
   const onRightClickCell = (p: Point) => {
     if (field.at(p).isOpen) return;
 
-    const newFlagPoints = state.flagPoints.clone();
-    if (newFlagPoints.includes(p)) {
-      newFlagPoints.remove(p);
+    let newFlagPoints: Point[];
+    if (includes(p, flagPoints)) {
+      newFlagPoints = flagPoints.filter(e => e.x !== p.x && e.y !== p.y)
     } else {
-      newFlagPoints.add(p);
+      newFlagPoints = [...flagPoints, p];
     }
 
-    setState({ ...state, flagPoints: newFlagPoints })
+    dispatch(setFlagPoints(newFlagPoints))
   }
 
   // ----------------------------------------------------------
@@ -181,17 +175,27 @@ function sequence(length: number): number[] {
  * @param state Fieldの状態
  * @returns Field
  */
-function buildField(width: number, height: number, state: MsFieldState) {
+function buildField(width: number, height: number, state: GameState) {
   const result = new Field(width, height);
 
-  state.minePoints.toArray().forEach(p => {
+  state.minePoints.forEach(p => {
     result.at(p).isMine = true;
     result.arround(p).forEach(cell => cell.count++);
   });
-  state.openPoints.toArray().forEach(p => result.at(p).isOpen = true);
-  state.flagPoints.toArray()
-    .filter(p => !state.openPoints.includes(p))
+  state.openPoints.forEach(p => result.at(p).isOpen = true);
+  state.flagPoints
+    .filter(p => !includes(p, state.openPoints))
     .forEach(p => result.at(p).isFlag = true);
 
   return result;
+}
+
+/**
+ * 配列内に座標が存在するか？
+ * @param needle 検索する座標
+ * @param haystack 検索対象の配列
+ * @returns 含まれていれば true
+ */
+function includes(needle: Point, haystack: Point[]): boolean {
+  return haystack.filter(p => p.x === needle.x).some(p => p.y === needle.y);
 }
