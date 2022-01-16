@@ -4,9 +4,6 @@ import Point from "./Point";
  * セルの状態
  */
 export default interface Cell {
-  /** 座標 */
-  at: Point;
-
   /** 周囲の地雷数 */
   count: number;
 

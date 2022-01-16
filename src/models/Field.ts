@@ -29,7 +29,6 @@ export default class Field {
       const row: Cell[] = [];
       for (let x = 0; x < width; x++) {
         row[x] = {
-          at: { x, y },
           count: 0,
           isMine: false,
           isOpen: false,
@@ -51,17 +50,17 @@ export default class Field {
   }
 
   /**
-   * 周囲のセルを取得する。
+   * 周囲の座標を取得する。
    * 
-   * 戻り値に盤外の座標のセルは含まれません。
+   * 戻り値に盤外の座標は含まれません。
    * @param p 座標
-   * @returns 周囲のセル
+   * @returns 周囲の座標
    */
-  public arround(p: Point): Cell[] {
-    const result: Cell[] = [];
+  public arroundPoints(p: Point): Point[] {
+    const result: Point[] = [];
 
     const addIfInside = (tmp: Point) => {
-      this.isInside(tmp) && result.push(this.at(tmp));
+      this.isInside(tmp) && result.push(tmp);
     }
 
     addIfInside({ x: p.x - 1, y: p.y - 1 });
@@ -76,6 +75,17 @@ export default class Field {
     addIfInside({ x: p.x + 1, y: p.y + 1 });
 
     return result;
+  }
+
+  /**
+   * 周囲のセルを取得する。
+   * 
+   * 戻り値に盤外の座標のセルは含まれません。
+   * @param p 座標
+   * @returns 周囲のセル
+   */
+  public arround(p: Point): Cell[] {
+    return this.arroundPoints(p).map(tmp => this.at(tmp));
   }
 
   /**

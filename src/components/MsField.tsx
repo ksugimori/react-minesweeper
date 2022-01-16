@@ -56,7 +56,7 @@ export default function MsField({ width, height }: Props) {
 
     // 開いたセルがまた空白セルなら、周囲の座標を新たにキューに入れる
     queue.filter(p => field.at(p).count === 0)
-      .flatMap(p => field.arround(p).map(cell => cell.at))
+      .flatMap(p => field.arroundPoints(p))
       .filter(p => !includes(p, newOpenPoints))
       .filter(p => !includes(p, flagPoints))
       .filter(p => includes(p, newQueue) || newQueue.push(p));
@@ -83,7 +83,7 @@ export default function MsField({ width, height }: Props) {
     if (cell.isOpen && cell.count > 0) {
       // count と同じ数のフラグが立てられていれば、それ以外のセルは開く
       if (cell.count === field.arround(clickedPoint).filter(cell => cell.isFlag).length) {
-        field.arround(clickedPoint).map(cell => cell.at)
+        field.arroundPoints(clickedPoint)
           .filter(p => !includes(p, newOpenPoints))
           .filter(p => !includes(p, flagPoints))
           .forEach(p => newOpenPoints.push(p));
@@ -99,7 +99,7 @@ export default function MsField({ width, height }: Props) {
     }
 
     if (cell.count === 0) {
-      field.arround(clickedPoint).map(cell => cell.at)
+      field.arroundPoints(clickedPoint)
         .filter(p => !includes(p, newOpenPoints))
         .filter(p => !includes(p, flagPoints))
         .forEach(p => includes(p, newOpenPointsQueue) || newOpenPointsQueue.push(p))
