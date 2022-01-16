@@ -1,5 +1,7 @@
 import Point from "../models/Point";
 
+export type Status = 'INIT' | 'PLAY' | 'WIN' | 'LOSE'
+
 /**
  * 基本設定
  */
@@ -15,6 +17,9 @@ export type Setting = {
  * ゲームの状態
  */
 export interface GameState {
+  /** ステータス */
+  status: Status;
+
   /** 設定 */
   setting: Setting;
 

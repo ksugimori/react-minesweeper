@@ -4,10 +4,11 @@ import Field from '../models/Field';
 import Point from '../models/Point';
 import MsCell from "./MsCell";
 import {
+  selectStatus,
+  selectSetting,
   selectMinePoints,
   selectFlagPoints,
   selectOpenPoints,
-  selectSetting,
   setOpenPoints,
   setFlagPoints
 } from '../features/game/gameSlice';
@@ -22,6 +23,7 @@ export default function MsField() {
 
   const dispatch = useDispatch();
 
+  const status = useSelector(selectStatus);
   const setting = useSelector(selectSetting);
   const minePoints = useSelector(selectMinePoints);
   const flagPoints = useSelector(selectFlagPoints);
@@ -31,6 +33,9 @@ export default function MsField() {
   const [queue, setQueue] = useState<Point[]>([]);
 
   const field = buildField(setting, minePoints, flagPoints, openPoints);
+  if (status === 'WIN' || status === 'LOSE') {
+    field.cells.flat().forEach(cell => cell.isOpen = true);
+  }
 
   // キューに値が入っている場合はそれらを開く
   useEffect(() => {
