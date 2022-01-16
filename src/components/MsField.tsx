@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { GameState } from '../app/App.interface';
 import Field from '../models/Field';
 import Point from '../models/Point';
 import MsCell from "./MsCell";
@@ -8,30 +7,22 @@ import {
   selectMinePoints,
   selectFlagPoints,
   selectOpenPoints,
+  selectSetting,
   setOpenPoints,
   setFlagPoints
 } from '../features/game/gameSlice';
 import "./MsField.scss";
-
-/**
- * 親要素から渡される props
- */
-interface Props {
-  /** 盤の横セル数 */
-  width: number;
-
-  /** 盤の縦セル数 */
-  height: number;
-}
+import { Setting } from '../app/App.interface';
 
 /**
  * ゲームの盤面を表すコンポーネント。
  * @returns Field
  */
-export default function MsField({ width, height }: Props) {
+export default function MsField() {
 
   const dispatch = useDispatch();
 
+  const setting = useSelector(selectSetting);
   const minePoints = useSelector(selectMinePoints);
   const flagPoints = useSelector(selectFlagPoints);
   const openPoints = useSelector(selectOpenPoints);
@@ -39,7 +30,7 @@ export default function MsField({ width, height }: Props) {
   // 開く必要のあるセルの座標。次回描画時に値が入っていればそれらを開く
   const [queue, setQueue] = useState<Point[]>([]);
 
-  const field = buildField(width, height, { minePoints, flagPoints, openPoints });
+  const field = buildField(setting, minePoints, flagPoints, openPoints);
 
   // キューに値が入っている場合はそれらを開く
   useEffect(() => {
@@ -138,9 +129,9 @@ export default function MsField({ width, height }: Props) {
     );
   }
 
-  const rows = sequence(height).map(y => (
+  const rows = sequence(setting.height).map(y => (
     <div key={y} className="field-row">
-      {sequence(width).map(x => createMsCell(x, y))}
+      {sequence(setting.width).map(x => createMsCell(x, y))}
     </div>
   ));
 
@@ -175,16 +166,18 @@ function sequence(length: number): number[] {
  * @param state Fieldの状態
  * @returns Field
  */
-function buildField(width: number, height: number, state: GameState) {
-  const result = new Field(width, height);
+function buildField(setting: Setting,
+  minePoints: Point[], flagPoints: Point[], openPoints: Point[]) {
 
-  state.minePoints.forEach(p => {
+  const result = new Field(setting.width, setting.height);
+
+  minePoints.forEach(p => {
     result.at(p).isMine = true;
     result.arround(p).forEach(cell => cell.count++);
   });
-  state.openPoints.forEach(p => result.at(p).isOpen = true);
-  state.flagPoints
-    .filter(p => !includes(p, state.openPoints))
+  openPoints.forEach(p => result.at(p).isOpen = true);
+  flagPoints
+    .filter(p => !includes(p, openPoints))
     .forEach(p => result.at(p).isFlag = true);
 
   return result;

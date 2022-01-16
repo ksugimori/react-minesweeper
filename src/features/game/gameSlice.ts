@@ -13,6 +13,10 @@ const defaultMines: Point[] = [
 ]
 
 const initialState: GameState = {
+  setting: {
+    width: 9,
+    height: 9
+  },
   minePoints: defaultMines,
   flagPoints: [],
   openPoints: []
@@ -41,6 +45,7 @@ export const { setOpenPoints, setFlagPoints } = gameSlice.actions;
 //
 // Selectors
 //
+export const selectSetting = (state: MsRootState) => state.game.setting;
 export const selectMinePoints = (state: MsRootState) => state.game.minePoints;
 export const selectOpenPoints = (state: MsRootState) => state.game.openPoints;
 export const selectFlagPoints = (state: MsRootState) => state.game.flagPoints;
