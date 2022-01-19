@@ -2,23 +2,10 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import Point from "../../models/Point";
 import { GameState, MsRootState } from "../../app/App.interface";
 
-// TODO: ランダムに設定
-const defaultMines: Point[] = [
-  { x: 3, y: 0 },
-  { x: 4, y: 1 },
-  { x: 8, y: 0 },
-  { x: 8, y: 1 },
-  { x: 7, y: 2 },
-  { x: 8, y: 2 }
-]
-
 const initialState: GameState = {
   status: 'INIT',
-  setting: {
-    width: 9,
-    height: 9
-  },
-  minePoints: defaultMines,
+  setting: { width: 9, height: 9, numMines: 10 },
+  minePoints: [],
   flagPoints: [],
   openPoints: []
 };
@@ -28,6 +15,9 @@ const gameSlice = createSlice({
   initialState,
   reducers: {
     setOpenPoints: (state, action: PayloadAction<Point[]>) => {
+      if (state.status === 'INIT') {
+        state.status = 'PLAY';
+      }
       state.openPoints = action.payload;
 
       const totalCells = state.setting.width * state.setting.height;
@@ -39,6 +29,9 @@ const gameSlice = createSlice({
     },
     setFlagPoints: (state, action: PayloadAction<Point[]>) => {
       state.flagPoints = action.payload;
+    },
+    setMinePoints: (state, action: PayloadAction<Point[]>) => {
+      state.minePoints = action.payload;
     }
   }
 })
@@ -48,7 +41,7 @@ export default gameSlice.reducer;
 //
 // Actions
 //
-export const { setOpenPoints, setFlagPoints } = gameSlice.actions;
+export const { setOpenPoints, setFlagPoints, setMinePoints } = gameSlice.actions;
 
 //
 // Selectors

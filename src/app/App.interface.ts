@@ -11,6 +11,9 @@ export type Setting = {
 
   /** 盤の高さ（セル数） */
   height: number;
+
+  /** 地雷数 */
+  numMines: number;
 };
 
 /**

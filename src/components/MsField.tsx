@@ -10,7 +10,8 @@ import {
   selectFlagPoints,
   selectOpenPoints,
   setOpenPoints,
-  setFlagPoints
+  setFlagPoints,
+  setMinePoints
 } from '../features/game/gameSlice';
 import "./MsField.scss";
 import { Setting } from '../app/App.interface';
@@ -74,6 +75,26 @@ export default function MsField() {
     if (cell.isFlag) {
       return;
     }
+
+    // TODO: わかりにくいので要検討
+    if (status === 'INIT') {
+      const mines: Point[] = [];
+      while (mines.length < setting.numMines) {
+        const x = Math.floor(Math.random() * (setting.width - 1));
+        const y = Math.floor(Math.random() * (setting.height - 1));
+
+        if (x !== clickedPoint.x && y !== clickedPoint.y
+          && !mines.filter(e => e.x === x).some(e => e.y === y)) {
+          mines.push({ x, y });
+        }
+      }
+
+      dispatch(setMinePoints(mines));
+      setQueue([clickedPoint]);
+      return; // TODO: ここでリターンするのがわかりにくい
+    }
+
+
 
     // すでに開かれてるセルの場合、
     if (cell.isOpen && cell.count > 0) {
